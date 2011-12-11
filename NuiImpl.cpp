@@ -14,7 +14,6 @@
 #include "stdafx.h"
 #include "SkeletalViewer.h"
 #include "resource.h"
-#include "btkC3DFileIO.h"
 
 static const COLORREF g_JointColorTable[NUI_SKELETON_POSITION_COUNT] = 
 {
@@ -780,8 +779,8 @@ void CSkeletalViewerApp::Nui_DrawSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA
 		// transform skeleton coordinates to RGB space
 		NuiImageGetColorPixelCoordinatesFromDepthPixel(NUI_IMAGE_RESOLUTION_640x480,0,m_Points[i].x,m_Points[i].y,fz,&color_x,&color_y);
 		// if recording, write coordinates to disk
-
-
+		//btk::Point point = btk::Point::New(i, btk::Point::Type::Marker, );
+		//acquisition->AppendPoint();
 		m_Points[i].x = color_x;
 		m_Points[i].y = color_y;
     }
@@ -877,6 +876,7 @@ void CSkeletalViewerApp::Nui_GotSkeletonAlert( )
 			int height = rc.bottom - rc.top;
 			// draw skeleton over rgb bitmap
 			//BitBlt(m_VideoDC, 0, 0, width, height, m_SkeletonDC, 0, 0, SRCPAINT);
+
             bBlank = false;
         }
     }
@@ -885,6 +885,7 @@ void CSkeletalViewerApp::Nui_GotSkeletonAlert( )
 	Nui_DoDoubleBuffer(GetDlgItem(m_hWnd,IDC_VIDEOVIEW), m_VideoDC);
 	// get complete bitmap and write to avi file
 	if (m_pAviFile) {
+
 		HGDIOBJ result = SelectObject(m_VideoDC, m_VideoBMP); 
 		m_pAviFile->AppendNewFrame(m_VideoBMP);
 	}

@@ -122,10 +122,26 @@ LRESULT CALLBACK CSkeletalViewerApp::MessageRouter(
 
 void CSkeletalViewerApp::StartRecording() {
 	if (!m_pAviFile) {
-		CString str = _T("C:/skeleton_capture");
 		// uses printf() format specifications for time
 		CString t = CTime::GetCurrentTime().Format(_T("%Hh%Mm%S"));
-		CString fileNameStr = str + _T("_") + t + _T(".avi");
+		CString str = _T("C:/skeleton_3d");
+		CString fileNameStr = str + _T("_") + t + _T(".c3d");
+		// Convert a TCHAR string to a LPCSTR
+		CT2CA pszConvertedAnsiString (fileNameStr);
+		// construct a std::string using the LPCSTR input
+		std::string strStd (pszConvertedAnsiString);
+		writer = btk::AcquisitionFileWriter::New();
+		writer->SetFilename(strStd);
+		acquisition = btk::Acquisition::New();
+		acquisition->Init(NUI_SKELETON_POSITION_COUNT, 1);
+		std::string pointUnit("m");
+		// set point unit to meters
+		acquisition->SetPointUnit(btk::Point::Type::Marker, pointUnit);
+		writer->SetInput(acquisition);
+		writer->Update();
+		// capture avi file
+		str = _T("C:/skeleton_capture");
+		fileNameStr = str + _T("_") + t + _T(".avi");
 		int sizeOfString = (fileNameStr.GetLength() + 1);
 		LPTSTR  lpsz = new TCHAR[ sizeOfString ];
 		_tcscpy_s(lpsz, sizeOfString, fileNameStr);
@@ -139,6 +155,9 @@ void CSkeletalViewerApp::StopRecording() {
 	if (m_pAviFile) {
 		delete m_pAviFile;
 		m_pAviFile = NULL;
+	}
+	if (writer) {
+		writer = NULL;
 	}
 }
 

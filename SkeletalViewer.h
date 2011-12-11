@@ -16,6 +16,8 @@
 #include "MSR_NuiApi.h"
 #include "DrawDevice.h"
 #include "AviFile.h"
+#include <btkAcquisitionFileWriter.h>
+
 #include "OpenGLDevice.h" //same as above
 
 #define SZ_APPDLG_WINDOW_CLASS          _T("SkeletalViewerAppDlgWndClass")
@@ -104,6 +106,8 @@ private:
     int           m_LastFPStime;
     int           m_LastFramesTotal;
 	OpenGLDevice openGLDevice; 
+	btk::AcquisitionFileWriter::Pointer writer;
+	btk::Acquisition::Pointer acquisition;
 };
 
 int MessageBoxResource(HWND hwnd,UINT nID,UINT nType);
