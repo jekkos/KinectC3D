@@ -16,6 +16,7 @@
 #include "MSR_NuiApi.h"
 #include "DrawDevice.h"
 #include "AviFile.h"
+#include "OpenGLDevice.h" //same as above
 
 #define SZ_APPDLG_WINDOW_CLASS          _T("SkeletalViewerAppDlgWndClass")
 #define WM_USER_UPDATE_FPS              WM_USER
@@ -66,6 +67,7 @@ private:
 	double CalcStartAngle(POINT3D point1, POINT3D point2, POINT3D point3);
 	void DrawSweepingArc(HDC dc, Vector4 *skeletonPositions, INT jointIndex) ;
 	void DrawAlignedImage();
+	void InitGL();
 
     CRITICAL_SECTION        m_critSecUi; // Gate UI operations on the background thread.
     static DWORD WINAPI     Nui_ProcessThread(LPVOID pParam);
@@ -90,8 +92,8 @@ private:
     HANDLE        m_pVideoStreamHandle;
     HFONT         m_hFontFPS;
     HPEN          m_Pen[6];
-    HDC           m_SkeletonDC, m_VideoDC, m_Skeleton3DDC;
-    HBITMAP       m_SkeletonBMP, m_VideoBMP;
+    HDC           m_SkeletonDC, m_VideoDC;
+    HBITMAP       m_VideoBMP;
     HGDIOBJ       m_SkeletonOldObj, m_VideoOldObj;
     int           m_PensTotal;
 	POINT3D       m_Points[NUI_SKELETON_POSITION_COUNT];
@@ -101,7 +103,7 @@ private:
     int           m_FramesTotal;
     int           m_LastFPStime;
     int           m_LastFramesTotal;
-	HGLRC		  hRC;
+	OpenGLDevice openGLDevice; 
 };
 
 int MessageBoxResource(HWND hwnd,UINT nID,UINT nType);

@@ -15,6 +15,7 @@
 #include "targetver.h"
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+#define NOMINMAX
 // Windows Header Files:
 #include <afxwin.h>
 #include <ole2.h>
@@ -31,6 +32,10 @@
 #include <math.h>
 #include <mmsystem.h>
 #include <assert.h>
+
+// OpenGL imports
+#include <gl/GL.h>
+#include <gl/GLU.h>
 
 
 extern TCHAR g_szAppTitle[];

@@ -244,6 +244,20 @@ LRESULT CALLBACK CSkeletalViewerApp::WndProc(HWND hWnd, UINT message, WPARAM wPa
             // Quit the main message pump
             PostQuitMessage(0);
             break;
+
+		case WM_SIZING: 
+
+			//Standard OpenGL Viewport initialization
+		   glViewport(0, 0, 320, 240); 
+ 
+		   glMatrixMode(GL_PROJECTION); 
+		   glLoadIdentity(); 
+ 
+		   gluPerspective(45.0f,(GLfloat)320/(GLfloat)240,0.1f,100.0f);
+ 
+		   glMatrixMode(GL_MODELVIEW); 
+		   glLoadIdentity();
+		   break;
     }
     return (FALSE);
 }

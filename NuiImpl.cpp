@@ -14,8 +14,7 @@
 #include "stdafx.h"
 #include "SkeletalViewer.h"
 #include "resource.h"
-#include <gl/GL.h>
-#include <gl/GLU.h>
+#include "btkC3DFileIO.h"
 
 static const COLORREF g_JointColorTable[NUI_SKELETON_POSITION_COUNT] = 
 {
@@ -56,7 +55,6 @@ void CSkeletalViewerApp::Nui_Zero()
     m_hEvNuiProcessStop=NULL;
     ZeroMemory(m_Pen,sizeof(m_Pen));
     m_SkeletonDC = NULL;
-    m_SkeletonBMP = NULL;
     m_SkeletonOldObj = NULL;
     m_PensTotal = 6;
     ZeroMemory(m_Points,sizeof(m_Points));
@@ -132,6 +130,23 @@ HRESULT CSkeletalViewerApp::Nui_Init(int index)
     return Nui_Init();
 }
 
+void CSkeletalViewerApp::InitGL() {
+   //Create our OpenGL Rendering Context
+   openGLDevice.create(m_SkeletonDC, 8);
+   //Standard OpenGL setup
+   glShadeModel(GL_SMOOTH);
+   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+   glClearDepth(1.0f); 
+   glEnable(GL_DEPTH_TEST); 
+   glDepthFunc(GL_LEQUAL); 
+   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+   // wglMakeCurrent( hdc, hRC );
+	glViewport(0, 0, 320, 240);
+	glMatrixMode(GL_PROJECTION); 
+	glLoadIdentity(); 
+	gluPerspective(45.0f,(GLfloat)320/(GLfloat)240,0.1f,100.0f);
+}
+
 HRESULT CSkeletalViewerApp::Nui_Init()
 {
     HRESULT                hr;
@@ -163,28 +178,9 @@ HRESULT CSkeletalViewerApp::Nui_Init()
     int height = rc.bottom - rc.top;
 	// initialize skeleton surface
     HDC hdc = GetDC(GetDlgItem( m_hWnd, IDC_SKELETALVIEW));
-    m_SkeletonBMP = CreateCompatibleBitmap( hdc, width, height );
     m_SkeletonDC = CreateCompatibleDC( hdc );
-    ::ReleaseDC(GetDlgItem(m_hWnd,IDC_SKELETALVIEW), hdc );
-
-	// OpenGL initialization
-	PIXELFORMATDESCRIPTOR pfd;
-	ZeroMemory( &pfd, sizeof( pfd ) );
-	pfd.nSize = sizeof( pfd );
-	pfd.nVersion = 1;
-	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL |
-				  PFD_DOUBLEBUFFER;
-	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 24;
-	pfd.cDepthBits = 16;
-	pfd.iLayerType = PFD_MAIN_PLANE;
-	int iFormat = ChoosePixelFormat( hdc, &pfd );
-	SetPixelFormat( hdc, iFormat, &pfd );
-	// create and enable the render context (RC)
-    hRC = wglCreateContext( hdc );
-    wglMakeCurrent( hdc, hRC );
-
-    m_SkeletonOldObj = SelectObject( m_SkeletonDC, m_SkeletonBMP );
+    //InitGL();
+	//::ReleaseDC(GetDlgItem(m_hWnd,IDC_SKELETALVIEW), hdc );
 	// initiliaze RGB surface
 	hdc = GetDC(GetDlgItem( m_hWnd, IDC_VIDEOVIEW));
 	width = rc.right - rc.left;
@@ -210,22 +206,6 @@ HRESULT CSkeletalViewerApp::Nui_Init()
         return hr;
     }
 
-	
-
-   /* hr = m_DrawVideo.CreateDevice( GetDlgItem( m_hWnd, IDC_VIDEOVIEW ) );
-    if( FAILED( hr ) )
-    {
-        MessageBoxResource( m_hWnd,IDS_ERROR_D3DCREATE,MB_OK | MB_ICONHAND);
-        return hr;
-    }
-
-    hr = m_DrawVideo.SetVideoType( 640, 480, 640 * 4 );
-    if( FAILED( hr ) )
-    {
-        MessageBoxResource( m_hWnd,IDS_ERROR_D3DVIDEOTYPE,MB_OK | MB_ICONHAND);
-        return hr;
-    }*/
-    
     DWORD nuiFlags = NUI_INITIALIZE_FLAG_USES_DEPTH_AND_PLAYER_INDEX | NUI_INITIALIZE_FLAG_USES_SKELETON |  NUI_INITIALIZE_FLAG_USES_COLOR;
     hr = m_pNuiInstance->NuiInitialize(nuiFlags);
     if (E_NUI_SKELETAL_ENGINE_BUSY == hr)
@@ -287,12 +267,10 @@ HRESULT CSkeletalViewerApp::Nui_Init()
 
 void CSkeletalViewerApp::Nui_UnInit( )
 {
-	wglMakeCurrent( NULL, NULL );
-    wglDeleteContext( hRC );
+	openGLDevice.destroy();
 
     ::SelectObject( m_SkeletonDC, m_SkeletonOldObj );
     DeleteDC( m_SkeletonDC );
-    DeleteObject( m_SkeletonBMP );
 
     ::SelectObject( m_VideoDC, m_VideoOldObj );
     DeleteDC( m_VideoDC );
@@ -746,19 +724,22 @@ void CSkeletalViewerApp::DrawSweepingArc(HDC dc, Vector4 *skeletonPositions, INT
 }
 
 void CSkeletalViewerApp::Nui_Draw3DSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA * pSkel, HWND hWnd, int WhichSkeletonColor ) {
-	wglMakeCurrent( dc, hRC );
-
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-    glBegin(GL_TRIANGLES);
-
-    glVertex3f(1.0f, 0.5f, 4.0f);    // lower left vertex
-    glVertex3f( 1.0f, -0.5f, 100.0f);    // lower right vertex
-    glVertex3f( 0.0f,  0.5f, -100.0f);    // upper vertex
-
-    glEnd();
-
-	SwapBuffers( dc );
+	//Standard OpenGL, you have to know this;)
+   //without comments... ;)
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+ 
+   glLoadIdentity();
+   glTranslatef(0.0f,0.0f,-5.0f);
+ 
+   //Triangle
+   glBegin(GL_TRIANGLES);
+      glColor3f(1.0f,0.0f,0.0f); glVertex3f(1.0f,-1.0f,0.0f);
+      glColor3f(0.0f,1.0f,0.0f); glVertex3f(0.0f,1.0f,0.0f);
+      glColor3f(0.0f,0.0f,1.0f); glVertex3f(-1.0f,-1.0f,0.0f);
+   glEnd();
+   //Done!!
+   // .. but don't forget that one..
+   SwapBuffers(dc);
 }
 
 void CSkeletalViewerApp::Nui_DrawSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA * pSkel, HWND hWnd, int WhichSkeletonColor )
@@ -798,6 +779,9 @@ void CSkeletalViewerApp::Nui_DrawSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA
 		m_Points[i].y = (int) ( fy * scaleY + 0.5f );
 		// transform skeleton coordinates to RGB space
 		NuiImageGetColorPixelCoordinatesFromDepthPixel(NUI_IMAGE_RESOLUTION_640x480,0,m_Points[i].x,m_Points[i].y,fz,&color_x,&color_y);
+		// if recording, write coordinates to disk
+
+
 		m_Points[i].x = color_x;
 		m_Points[i].y = color_y;
     }
