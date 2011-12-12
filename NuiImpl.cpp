@@ -741,6 +741,12 @@ void CSkeletalViewerApp::Nui_Draw3DSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DA
    SwapBuffers(dc);
 }
 
+void AddVector( INT row, Vector4 vector, btk::Point::Values& traj) {
+	traj.coeffRef(row, 0) = vector.x;
+	traj.coeffRef(row, 1) = vector.y;
+	traj.coeffRef(row, 2) = vector.z;
+}
+
 void CSkeletalViewerApp::Nui_DrawSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA * pSkel, HWND hWnd, int WhichSkeletonColor )
 {
     HGDIOBJ hOldObj = SelectObject(dc,m_Pen[WhichSkeletonColor % m_PensTotal]);
@@ -771,6 +777,21 @@ void CSkeletalViewerApp::Nui_DrawSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA
 	USHORT fz;
     int i;
 	LONG color_x, color_y;
+	if (m_pWriter) {
+		m_pAcquisition->ResizeFrameNumber(m_FramesTotal);
+		 for (i = 0; i < NUI_SKELETON_POSITION_COUNT; i++) {
+			char buffer [16];
+			btk::Point::Pointer point = m_pAcquisition->GetPoint(i);
+			INT framenumber = point->GetFrameNumber();
+			point->SetLabel(itoa(i, buffer, 10));
+			point->SetType(btk::Point::Type::Marker);
+			//point->SetFrameNumber(m_FramesTotal);
+			btk::Point::Values& traj = point->GetValues();
+			AddVector(m_FramesTotal - 1, pSkel->SkeletonPositions[i], traj);
+		 }
+		
+	}
+	
     for (i = 0; i < NUI_SKELETON_POSITION_COUNT; i++)
     {
         NuiTransformSkeletonToDepthImageF( pSkel->SkeletonPositions[i], &fx, &fy, &fz );
@@ -779,8 +800,6 @@ void CSkeletalViewerApp::Nui_DrawSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA
 		// transform skeleton coordinates to RGB space
 		NuiImageGetColorPixelCoordinatesFromDepthPixel(NUI_IMAGE_RESOLUTION_640x480,0,m_Points[i].x,m_Points[i].y,fz,&color_x,&color_y);
 		// if recording, write coordinates to disk
-		//btk::Point point = btk::Point::New(i, btk::Point::Type::Marker, );
-		//acquisition->AppendPoint();
 		m_Points[i].x = color_x;
 		m_Points[i].y = color_y;
     }

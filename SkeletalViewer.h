@@ -106,8 +106,8 @@ private:
     int           m_LastFPStime;
     int           m_LastFramesTotal;
 	OpenGLDevice openGLDevice; 
-	btk::AcquisitionFileWriter::Pointer writer;
-	btk::Acquisition::Pointer acquisition;
+	btk::AcquisitionFileWriter::Pointer m_pWriter;
+	btk::Acquisition::Pointer m_pAcquisition;
 };
 
 int MessageBoxResource(HWND hwnd,UINT nID,UINT nType);
