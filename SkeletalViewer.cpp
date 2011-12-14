@@ -139,23 +139,16 @@ void CSkeletalViewerApp::StartRecording() {
 		m_pWriter->SetFilename(strStd);
 		m_pAcquisition = btk::Acquisition::New();
 		m_pAcquisition->Init(NUI_SKELETON_POSITION_COUNT + 4, 300);
-		INT curentInt = m_pAcquisition->GetMaxInterpolationGap();
-		m_pAcquisition->SetMaxInterpolationGap(20);
 		for (INT i = 0; i < NUI_SKELETON_POSITION_COUNT; i++) {
 			btk::Point::Pointer point = m_pAcquisition->GetPoint(i);
 			// set marker point labels
-			char buffer [16];
 			point->SetLabel(m_JointLabels[i]);
-			// set angle labels
 		}
 
 		for (INT i = NUI_SKELETON_POSITION_COUNT; i < NUI_SKELETON_POSITION_COUNT + 4; i++) {
 			btk::Point::Pointer point = m_pAcquisition->GetPoint(i);
 			// set marker point labels
-			char buffer [16];
-			point->SetLabel(_itoa(i, buffer, 10));
 			point->SetType(btk::Point::Type::Angle);
-			// add angles
 		}
 
 		std::string markerUnit("m");

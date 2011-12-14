@@ -699,14 +699,15 @@ void AddMarker( INT row, Vector4 vector, btk::Point::Values& traj) {
 	traj.coeffRef(row, 2) = vector.z;
 }
 
-void AddAngle(INT row, btk::Point::Pointer point, NUI_SKELETON_DATA * pSkel, NUI_SKELETON_POSITION_INDEX joint1,
-	NUI_SKELETON_POSITION_INDEX joint2, NUI_SKELETON_POSITION_INDEX joint3, std::string label ) {
+void AddAngle(INT row, btk::Point::Pointer point, NUI_SKELETON_DATA * pSkel, int joint1,
+	int joint2, int joint3, std::string label ) {
 	double angle = CalcAngle(pSkel->SkeletonPositions[joint1], 
 		pSkel->SkeletonPositions[joint2], pSkel->SkeletonPositions[joint3]);
 	if (angle != 0) {
-		point->GetValues().coeffRef(row, 0) = angle;
-		point->GetValues().coeffRef(row, 1) = angle;
-		point->GetValues().coeffRef(row, 2) = angle;
+		btk::Point::Values& traj = point->GetValues();
+		traj.coeffRef(row, 0) = angle;
+		traj.coeffRef(row, 1) = angle;
+		traj.coeffRef(row, 2) = angle;
 		point->SetLabel(label);
 	}
 }
@@ -801,10 +802,10 @@ void CSkeletalViewerApp::Nui_DoDoubleBuffer(HWND hWnd,HDC hDC)
 void CSkeletalViewerApp::Nui_WriteToFile(NUI_SKELETON_DATA * pSkel) {
 	if (m_pWriter) {
 		m_pAcquisition->ResizeFrameNumber(m_RecordedFrames);
-		 for (INT i = 0; i < NUI_SKELETON_POSITION_COUNT; i++) {
+		for (INT i = 0; i < NUI_SKELETON_POSITION_COUNT; i++) {
 			if ( pSkel->eSkeletonPositionTrackingState[i] != NUI_SKELETON_POSITION_NOT_TRACKED) {
 				btk::Point::Pointer point = m_pAcquisition->GetPoint(i);
-				point->SetFrameNumber(m_RecordedFrames);
+				//point->SetFrameNumber(m_RecordedFrames);
 				btk::Point::Values& traj = point->GetValues();
 				AddMarker(m_RecordedFrames - 1, pSkel->SkeletonPositions[i], traj);
 			}
@@ -863,8 +864,9 @@ void CSkeletalViewerApp::Nui_GotSkeletonAlert( )
             SkeletonFrame.SkeletonData[i].eSkeletonPositionTrackingState[NUI_SKELETON_POSITION_SHOULDER_CENTER] != NUI_SKELETON_POSITION_NOT_TRACKED)
         {
             Nui_DrawSkeleton( m_VideoDC, bBlank, &SkeletonFrame.SkeletonData[i], GetDlgItem( m_hWnd, IDC_VIDEOVIEW ), i );
-			// TODO multiple skeletons at the same time??
+			// just track first skeleton only
 			Nui_WriteToFile(  &SkeletonFrame.SkeletonData[i] );
+		
 			RECT rc;
 			GetWindowRect(GetDlgItem( m_hWnd, IDC_VIDEOVIEW ), &rc );
 			int width = rc.right - rc.left;
