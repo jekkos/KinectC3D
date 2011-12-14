@@ -24,9 +24,13 @@
 #define WM_USER_UPDATE_FPS              WM_USER
 #define WM_USER_UPDATE_COMBO            WM_USER+1
 
-typedef struct POINT3D {
-	double x, y, z;
-};
+typedef Vector4 POINT3D;
+
+typedef struct {
+	INT index1;
+	INT index2; 
+	INT index3;
+} SKELETON_ANGLE;
 
 class CSkeletalViewerApp
 {
@@ -61,15 +65,8 @@ private:
     void UpdateComboBox();
 	void StartRecording();
 	void StopRecording();
-	double CalcDist(POINT3D point1, POINT3D point2);
-	double CalcAngle(POINT3D point1, POINT3D point2, POINT3D point3);
-	double CalcSlope(POINT3D point1, POINT3D point2);
-	double AngleFromSlope(double slope);
-	INT CalcQuadrant(POINT3D reference, POINT3D point);
-	double CalcStartAngle(POINT3D point1, POINT3D point2, POINT3D point3);
 	void DrawSweepingArc(HDC dc, Vector4 *skeletonPositions, INT jointIndex) ;
-	void DrawAlignedImage();
-	void InitGL();
+	void Nui_WriteToFile(NUI_SKELETON_DATA * pSkel);
 
     CRITICAL_SECTION        m_critSecUi; // Gate UI operations on the background thread.
     static DWORD WINAPI     Nui_ProcessThread(LPVOID pParam);
@@ -105,9 +102,11 @@ private:
     int           m_FramesTotal;
     int           m_LastFPStime;
     int           m_LastFramesTotal;
-	OpenGLDevice openGLDevice; 
+	int			  m_RecordedFrames;
 	btk::AcquisitionFileWriter::Pointer m_pWriter;
 	btk::Acquisition::Pointer m_pAcquisition;
+
+	
 };
 
 int MessageBoxResource(HWND hwnd,UINT nID,UINT nType);

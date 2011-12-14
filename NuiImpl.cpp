@@ -129,23 +129,6 @@ HRESULT CSkeletalViewerApp::Nui_Init(int index)
     return Nui_Init();
 }
 
-void CSkeletalViewerApp::InitGL() {
-   //Create our OpenGL Rendering Context
-   openGLDevice.create(m_SkeletonDC, 8);
-   //Standard OpenGL setup
-   glShadeModel(GL_SMOOTH);
-   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-   glClearDepth(1.0f); 
-   glEnable(GL_DEPTH_TEST); 
-   glDepthFunc(GL_LEQUAL); 
-   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-   // wglMakeCurrent( hdc, hRC );
-	glViewport(0, 0, 320, 240);
-	glMatrixMode(GL_PROJECTION); 
-	glLoadIdentity(); 
-	gluPerspective(45.0f,(GLfloat)320/(GLfloat)240,0.1f,100.0f);
-}
-
 HRESULT CSkeletalViewerApp::Nui_Init()
 {
     HRESULT                hr;
@@ -172,24 +155,18 @@ HRESULT CSkeletalViewerApp::Nui_Init()
     m_hNextVideoFrameEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
     m_hNextSkeletonEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
 
-    GetWindowRect(GetDlgItem( m_hWnd, IDC_SKELETALVIEW ), &rc );
+    GetWindowRect(GetDlgItem( m_hWnd, IDC_VIDEOVIEW ), &rc );
     int width = rc.right - rc.left;
     int height = rc.bottom - rc.top;
-	// initialize skeleton surface
-    HDC hdc = GetDC(GetDlgItem( m_hWnd, IDC_SKELETALVIEW));
-    m_SkeletonDC = CreateCompatibleDC( hdc );
-    //InitGL();
-	//::ReleaseDC(GetDlgItem(m_hWnd,IDC_SKELETALVIEW), hdc );
+
 	// initiliaze RGB surface
-	hdc = GetDC(GetDlgItem( m_hWnd, IDC_VIDEOVIEW));
+	HDC hdc = GetDC(GetDlgItem( m_hWnd, IDC_VIDEOVIEW));
 	width = rc.right - rc.left;
     height = rc.bottom - rc.top;
     m_VideoBMP = CreateCompatibleBitmap( hdc, width, height );
     m_VideoDC = CreateCompatibleDC( hdc );
     ::ReleaseDC(GetDlgItem(m_hWnd,IDC_VIDEOVIEW), hdc );
     m_VideoOldObj = SelectObject( m_VideoDC, m_VideoBMP );
-
-	
 
 	hr = m_DrawDepth.CreateDevice( GetDlgItem( m_hWnd, IDC_DEPTHVIEWER ) );
     if( FAILED( hr ) )
@@ -266,10 +243,6 @@ HRESULT CSkeletalViewerApp::Nui_Init()
 
 void CSkeletalViewerApp::Nui_UnInit( )
 {
-	openGLDevice.destroy();
-
-    ::SelectObject( m_SkeletonDC, m_SkeletonOldObj );
-    DeleteDC( m_SkeletonDC );
 
     ::SelectObject( m_VideoDC, m_VideoOldObj );
     DeleteDC( m_VideoDC );
@@ -381,9 +354,7 @@ DWORD WINAPI CSkeletalViewerApp::Nui_ProcessThread()
         {
             if( !m_bScreenBlanked )
             {
-                Nui_BlankSkeletonScreen( GetDlgItem( m_hWnd, IDC_SKELETALVIEW ) );
                 m_bScreenBlanked = true;
-				
             }
         }
 		
@@ -410,6 +381,7 @@ DWORD WINAPI CSkeletalViewerApp::Nui_ProcessThread()
 
             case 3:
                 Nui_GotSkeletonAlert( );
+				
                 break;
         }
     }
@@ -465,7 +437,11 @@ void CSkeletalViewerApp::Nui_GotVideoAlert( )
     {
         OutputDebugString( L"Buffer length of received texture is bogus\r\n" );
     }
-	//Nui_DoDoubleBuffer(GetDlgItem(m_hWnd,IDC_VIDEOVIEW), m_VideoDC);
+
+	if (m_bScreenBlanked) {
+		Nui_DoDoubleBuffer(GetDlgItem(m_hWnd,IDC_VIDEOVIEW), m_VideoDC);
+	}
+	
     m_pNuiInstance->NuiImageStreamReleaseFrame( m_pVideoStreamHandle, pImageFrame );
 }
 
@@ -506,9 +482,6 @@ void CSkeletalViewerApp::Nui_GotDepthAlert( )
         }
 
         m_DrawDepth.DrawFrame( (BYTE*) m_rgbWk );
-
-		Nui_Draw3DSkeleton( m_SkeletonDC, FALSE, NULL, GetDlgItem( m_hWnd, IDC_SKELETALVIEW ), 0 );
-
     }
     else
     {
@@ -618,17 +591,17 @@ void CSkeletalViewerApp::Nui_DrawSkeletonSegment(HDC dc, NUI_SKELETON_DATA * pSk
     va_end(vl);
 }
 
-double CSkeletalViewerApp::CalcDist(POINT3D point1, POINT3D point2) {
-	return sqrt(pow(point2.x - point1.x, 2.0) + pow(point2.y - point1.y, 2.0) + pow(point2.z - point1.z, 2.0));
+double CalcDist(POINT3D point1, POINT3D point2) {
+	return sqrt(powf(point2.x - point1.x, 2.0) + powf(point2.y - point1.y, 2.0) + powf(point2.z - point1.z, 2.0));
 }
 
-double CSkeletalViewerApp::CalcSlope(POINT3D point1, POINT3D point2) {
+double CalcSlope(POINT3D point1, POINT3D point2) {
 	// determine starting point for angle relative to x-axis
 	double xDiff = point2.x - point1.x;
 	return xDiff != 0 ? -(point2.y - point1.y) / xDiff : 0;
 }
 
-INT CSkeletalViewerApp::CalcQuadrant(POINT3D reference, POINT3D point) {
+INT CalcQuadrant(POINT3D reference, POINT3D point) {
 	INT result = 0;
 	BOOL xSmaller = point.x < reference.x;
 	BOOL ySmaller = point.y < reference.y;
@@ -640,7 +613,7 @@ INT CSkeletalViewerApp::CalcQuadrant(POINT3D reference, POINT3D point) {
 	return result;
 }
 
-double CSkeletalViewerApp::CalcAngle(POINT3D point1, POINT3D point2, POINT3D point3) {
+double CalcAngle(Vector4 point1, Vector4 point2, Vector4 point3) {
 	double dotProduct = (point1.x - point2.x) * (point3.x - point2.x) + (point1.y - point2.y) * (point3.y - point2.y) + (point1.z - point2.z) * (point3.z - point2.z);
 	double distA = CalcDist(point1, point2);
 	double distB = CalcDist(point2, point3);
@@ -648,7 +621,13 @@ double CSkeletalViewerApp::CalcAngle(POINT3D point1, POINT3D point2, POINT3D poi
 	return acos(cosAlpha) * 180 / M_PI;
 }
 
-double CSkeletalViewerApp::CalcStartAngle(POINT3D point1, POINT3D point2, POINT3D point3) {
+double AngleFromSlope(double slope) {
+	double result = slope != 0 ? atan(slope) : M_PI/2;
+	// convert to degrees
+	return result * 180 / M_PI;
+}
+
+double CalcStartAngle(POINT3D point1, POINT3D point2, POINT3D point3) {
 	INT quadrant1 = CalcQuadrant(point2, point1);
 	INT quadrant2 = CalcQuadrant(point2, point3);
 	INT chosenQuadrant;
@@ -667,25 +646,15 @@ double CSkeletalViewerApp::CalcStartAngle(POINT3D point1, POINT3D point2, POINT3
 	return angle + 90 * (chosenQuadrant - evenQuadrant);
 }
 
-double CSkeletalViewerApp::AngleFromSlope(double slope) {
-	double result = slope != 0 ? atan(slope) : M_PI/2;
-	// convert to degrees
-	return result * 180 / M_PI;
-}
-
 void CSkeletalViewerApp::DrawSweepingArc(HDC dc, Vector4 *skeletonPositions, INT jointIndex) {
 	INT OFFSET = 20;
-
 	// darw arc, get coordinates in meters
-	POINT3D point1 = {skeletonPositions[jointIndex + 1].x,  skeletonPositions[jointIndex + 1].y,skeletonPositions[jointIndex + 1].z};
-	POINT3D point2 = {skeletonPositions[jointIndex].x,  skeletonPositions[jointIndex].y, skeletonPositions[jointIndex].z};
-	POINT3D point3 = {skeletonPositions[jointIndex - 1].x,  skeletonPositions[jointIndex - 1].y, skeletonPositions[jointIndex - 1].z};
+	POINT3D point1 = skeletonPositions[jointIndex + 1];
+	POINT3D point2 = skeletonPositions[jointIndex];
+	POINT3D point3 = skeletonPositions[jointIndex - 1];
 
 	double angle = CalcAngle(point1, point2, point3);
 
-	//double distA = CalcDist(point1, point2);
-	//double distB = CalcDist(point2, point3);
-	//double distC = CalcDist(point3, point1);
 	// paint all this to screen
 	point1 = m_Points[jointIndex + 1];
 	point2 = m_Points[jointIndex];
@@ -698,9 +667,11 @@ void CSkeletalViewerApp::DrawSweepingArc(HDC dc, Vector4 *skeletonPositions, INT
 	HPEN pen = CreatePen( PS_SOLID, 3, RGB(255, 0, 0) );
 	HGDIOBJ oldObj = SelectObject(dc, pen);
 	MoveToEx(dc, point1.x, point1.y, &oldPosition);
-	LineTo(dc, point2.x, point2.y);
+	#ifdef _DEBUG
+	/*LineTo(dc, point2.x, point2.y);
 	LineTo(dc, point3.x, point3.y);
-	LineTo(dc, point1.x, point1.y);
+	LineTo(dc, point1.x, point1.y);*/
+	#endif
 	MoveToEx(dc, point2.x, point2.y, NULL);
 	pen = CreatePen( PS_SOLID, 3, RGB(255, 255, 0) );
 	SelectObject(dc, pen);
@@ -722,30 +693,24 @@ void CSkeletalViewerApp::DrawSweepingArc(HDC dc, Vector4 *skeletonPositions, INT
 	SelectObject(dc, oldObj);
 }
 
-void CSkeletalViewerApp::Nui_Draw3DSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA * pSkel, HWND hWnd, int WhichSkeletonColor ) {
-	//Standard OpenGL, you have to know this;)
-   //without comments... ;)
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
- 
-   glLoadIdentity();
-   glTranslatef(0.0f,0.0f,-5.0f);
- 
-   //Triangle
-   glBegin(GL_TRIANGLES);
-      glColor3f(1.0f,0.0f,0.0f); glVertex3f(1.0f,-1.0f,0.0f);
-      glColor3f(0.0f,1.0f,0.0f); glVertex3f(0.0f,1.0f,0.0f);
-      glColor3f(0.0f,0.0f,1.0f); glVertex3f(-1.0f,-1.0f,0.0f);
-   glEnd();
-   //Done!!
-   // .. but don't forget that one..
-   SwapBuffers(dc);
-}
-
-void AddVector( INT row, Vector4 vector, btk::Point::Values& traj) {
+void AddMarker( INT row, Vector4 vector, btk::Point::Values& traj) {
 	traj.coeffRef(row, 0) = vector.x;
 	traj.coeffRef(row, 1) = vector.y;
 	traj.coeffRef(row, 2) = vector.z;
 }
+
+void AddAngle(INT row, btk::Point::Pointer point, NUI_SKELETON_DATA * pSkel, NUI_SKELETON_POSITION_INDEX joint1,
+	NUI_SKELETON_POSITION_INDEX joint2, NUI_SKELETON_POSITION_INDEX joint3, std::string label ) {
+	double angle = CalcAngle(pSkel->SkeletonPositions[joint1], 
+		pSkel->SkeletonPositions[joint2], pSkel->SkeletonPositions[joint3]);
+	if (angle != 0) {
+		point->GetValues().coeffRef(row, 0) = angle;
+		point->GetValues().coeffRef(row, 1) = angle;
+		point->GetValues().coeffRef(row, 2) = angle;
+		point->SetLabel(label);
+	}
+}
+
 
 void CSkeletalViewerApp::Nui_DrawSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA * pSkel, HWND hWnd, int WhichSkeletonColor )
 {
@@ -777,21 +742,6 @@ void CSkeletalViewerApp::Nui_DrawSkeleton(HDC dc, bool bBlank, NUI_SKELETON_DATA
 	USHORT fz;
     int i;
 	LONG color_x, color_y;
-	if (m_pWriter) {
-		m_pAcquisition->ResizeFrameNumber(m_FramesTotal);
-		 for (i = 0; i < NUI_SKELETON_POSITION_COUNT; i++) {
-			char buffer [16];
-			btk::Point::Pointer point = m_pAcquisition->GetPoint(i);
-			INT framenumber = point->GetFrameNumber();
-			point->SetLabel(itoa(i, buffer, 10));
-			point->SetType(btk::Point::Type::Marker);
-			//point->SetFrameNumber(m_FramesTotal);
-			btk::Point::Values& traj = point->GetValues();
-			AddVector(m_FramesTotal - 1, pSkel->SkeletonPositions[i], traj);
-		 }
-		
-	}
-	
     for (i = 0; i < NUI_SKELETON_POSITION_COUNT; i++)
     {
         NuiTransformSkeletonToDepthImageF( pSkel->SkeletonPositions[i], &fx, &fy, &fz );
@@ -848,6 +798,30 @@ void CSkeletalViewerApp::Nui_DoDoubleBuffer(HWND hWnd,HDC hDC)
 
 }
 
+void CSkeletalViewerApp::Nui_WriteToFile(NUI_SKELETON_DATA * pSkel) {
+	if (m_pWriter) {
+		m_pAcquisition->ResizeFrameNumber(m_RecordedFrames);
+		 for (INT i = 0; i < NUI_SKELETON_POSITION_COUNT; i++) {
+			if ( pSkel->eSkeletonPositionTrackingState[i] != NUI_SKELETON_POSITION_NOT_TRACKED) {
+				btk::Point::Pointer point = m_pAcquisition->GetPoint(i);
+				point->SetFrameNumber(m_RecordedFrames);
+				btk::Point::Values& traj = point->GetValues();
+				AddMarker(m_RecordedFrames - 1, pSkel->SkeletonPositions[i], traj);
+			}
+		 }
+		 btk::Point::Pointer point = m_pAcquisition->GetPoint(NUI_SKELETON_POSITION_COUNT);
+		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_HIP_LEFT, NUI_SKELETON_POSITION_KNEE_LEFT, NUI_SKELETON_POSITION_ANKLE_LEFT, "Left Knee");
+		 point = m_pAcquisition->GetPoint(NUI_SKELETON_POSITION_COUNT + 1);
+		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_HIP_RIGHT, NUI_SKELETON_POSITION_KNEE_RIGHT, NUI_SKELETON_POSITION_ANKLE_RIGHT, "Right Knee");
+		 point = m_pAcquisition->GetPoint(NUI_SKELETON_POSITION_COUNT + 2);
+		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_KNEE_LEFT, NUI_SKELETON_POSITION_ANKLE_LEFT, NUI_SKELETON_POSITION_FOOT_LEFT, "Left Foot");
+		 point = m_pAcquisition->GetPoint(NUI_SKELETON_POSITION_COUNT + 3);
+		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_KNEE_RIGHT, NUI_SKELETON_POSITION_ANKLE_RIGHT, NUI_SKELETON_POSITION_FOOT_RIGHT, "Right Foot");
+		 m_RecordedFrames++;
+	}
+
+}
+
 void CSkeletalViewerApp::Nui_GotSkeletonAlert( )
 {
     NUI_SKELETON_FRAME SkeletonFrame;
@@ -889,6 +863,8 @@ void CSkeletalViewerApp::Nui_GotSkeletonAlert( )
             SkeletonFrame.SkeletonData[i].eSkeletonPositionTrackingState[NUI_SKELETON_POSITION_SHOULDER_CENTER] != NUI_SKELETON_POSITION_NOT_TRACKED)
         {
             Nui_DrawSkeleton( m_VideoDC, bBlank, &SkeletonFrame.SkeletonData[i], GetDlgItem( m_hWnd, IDC_VIDEOVIEW ), i );
+			// TODO multiple skeletons at the same time??
+			Nui_WriteToFile(  &SkeletonFrame.SkeletonData[i] );
 			RECT rc;
 			GetWindowRect(GetDlgItem( m_hWnd, IDC_VIDEOVIEW ), &rc );
 			int width = rc.right - rc.left;
@@ -904,7 +880,6 @@ void CSkeletalViewerApp::Nui_GotSkeletonAlert( )
 	Nui_DoDoubleBuffer(GetDlgItem(m_hWnd,IDC_VIDEOVIEW), m_VideoDC);
 	// get complete bitmap and write to avi file
 	if (m_pAviFile) {
-
 		HGDIOBJ result = SelectObject(m_VideoDC, m_VideoBMP); 
 		m_pAviFile->AppendNewFrame(m_VideoBMP);
 	}

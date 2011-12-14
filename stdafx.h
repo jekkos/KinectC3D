@@ -33,10 +33,6 @@
 #include <mmsystem.h>
 #include <assert.h>
 
-// OpenGL imports
-#include <gl/GL.h>
-#include <gl/GLU.h>
-
 
 extern TCHAR g_szAppTitle[];
 

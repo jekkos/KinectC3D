@@ -22,12 +22,16 @@
 #include "SkeletalViewer.h"
 #include "resource.h"
 
+static const std::string m_JointLabels[] = {"Hip Center", "Spine", "Shoulder Center", "Head", "Left Shoulder",  
+	"Left Elbow", "Left Wrist", "Left Hand", "Right Shoulder", "Right Elbow", 
+	"Right Wrist", "Right Hand", "Left Hip", "Left Knee", "Left Ankle", 
+	"Left Foot", "Right Hip", "Right Knee", "Right Ankle", "Right Foot"};
+
 // Global Variables:
 CSkeletalViewerApp	g_CSkeletalViewerApp;	// Application class
 HINSTANCE			g_hInst;				// current instance
 HWND				g_hWndApp;				// Windows Handle to main application
 TCHAR				g_szAppTitle[256];		// Application title
-
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPTSTR lpCmdLine,int nCmdShow)
 {
@@ -124,6 +128,7 @@ void CSkeletalViewerApp::StartRecording() {
 	// uses printf() format specifications for time
 	CString t = CTime::GetCurrentTime().Format(_T("%Hh%Mm%S"));
 	if (!m_pWriter) {
+		m_RecordedFrames = 1;
 		CString str = _T("C:/skeleton_3d");
 		CString fileNameStr = str + _T("_") + t + _T(".c3d");
 		// Convert a TCHAR string to a LPCSTR
@@ -133,10 +138,31 @@ void CSkeletalViewerApp::StartRecording() {
 		m_pWriter = btk::AcquisitionFileWriter::New();
 		m_pWriter->SetFilename(strStd);
 		m_pAcquisition = btk::Acquisition::New();
-		m_pAcquisition->Init(NUI_SKELETON_POSITION_COUNT, 1);
-		std::string pointUnit("m");
+		m_pAcquisition->Init(NUI_SKELETON_POSITION_COUNT + 4, 300);
+		INT curentInt = m_pAcquisition->GetMaxInterpolationGap();
+		m_pAcquisition->SetMaxInterpolationGap(20);
+		for (INT i = 0; i < NUI_SKELETON_POSITION_COUNT; i++) {
+			btk::Point::Pointer point = m_pAcquisition->GetPoint(i);
+			// set marker point labels
+			char buffer [16];
+			point->SetLabel(m_JointLabels[i]);
+			// set angle labels
+		}
+
+		for (INT i = NUI_SKELETON_POSITION_COUNT; i < NUI_SKELETON_POSITION_COUNT + 4; i++) {
+			btk::Point::Pointer point = m_pAcquisition->GetPoint(i);
+			// set marker point labels
+			char buffer [16];
+			point->SetLabel(_itoa(i, buffer, 10));
+			point->SetType(btk::Point::Type::Angle);
+			// add angles
+		}
+
+		std::string markerUnit("m");
+		std::string angleUnit("degrees");
 		// set point unit to meters
-		m_pAcquisition->SetPointUnit(btk::Point::Type::Marker, pointUnit);
+		m_pAcquisition->SetPointUnit(btk::Point::Type::Marker, markerUnit);
+		m_pAcquisition->SetPointUnit(btk::Point::Type::Angle, angleUnit);
 		m_pWriter->SetInput(m_pAcquisition);
 		m_pWriter->Update();
 	}
@@ -159,8 +185,10 @@ void CSkeletalViewerApp::StopRecording() {
 		m_pAviFile = NULL;
 	}
 	if (m_pWriter) {
+		m_pAcquisition->ResizeFrameNumber(m_RecordedFrames);
+		// flush pending changes to file
 		m_pWriter->Update();
-		//m_pWriter = NULL;
+		m_pWriter->SetInput(NULL);
 	}
 }
 
@@ -267,19 +295,6 @@ LRESULT CALLBACK CSkeletalViewerApp::WndProc(HWND hWnd, UINT message, WPARAM wPa
             PostQuitMessage(0);
             break;
 
-		case WM_SIZING: 
-
-			//Standard OpenGL Viewport initialization
-		   glViewport(0, 0, 320, 240); 
- 
-		   glMatrixMode(GL_PROJECTION); 
-		   glLoadIdentity(); 
- 
-		   gluPerspective(45.0f,(GLfloat)320/(GLfloat)240,0.1f,100.0f);
- 
-		   glMatrixMode(GL_MODELVIEW); 
-		   glLoadIdentity();
-		   break;
     }
     return (FALSE);
 }
