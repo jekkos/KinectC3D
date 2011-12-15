@@ -811,13 +811,13 @@ void CSkeletalViewerApp::Nui_WriteToFile(NUI_SKELETON_DATA * pSkel) {
 			}
 		 }
 		 btk::Point::Pointer point = m_pAcquisition->GetPoint(NUI_SKELETON_POSITION_COUNT);
-		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_HIP_LEFT, NUI_SKELETON_POSITION_KNEE_LEFT, NUI_SKELETON_POSITION_ANKLE_LEFT, "Left Knee");
+		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_HIP_LEFT, NUI_SKELETON_POSITION_KNEE_LEFT, NUI_SKELETON_POSITION_ANKLE_LEFT, "Left Knee Angle");
 		 point = m_pAcquisition->GetPoint(NUI_SKELETON_POSITION_COUNT + 1);
-		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_HIP_RIGHT, NUI_SKELETON_POSITION_KNEE_RIGHT, NUI_SKELETON_POSITION_ANKLE_RIGHT, "Right Knee");
+		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_HIP_RIGHT, NUI_SKELETON_POSITION_KNEE_RIGHT, NUI_SKELETON_POSITION_ANKLE_RIGHT, "Right Knee Angle");
 		 point = m_pAcquisition->GetPoint(NUI_SKELETON_POSITION_COUNT + 2);
-		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_KNEE_LEFT, NUI_SKELETON_POSITION_ANKLE_LEFT, NUI_SKELETON_POSITION_FOOT_LEFT, "Left Foot");
+		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_KNEE_LEFT, NUI_SKELETON_POSITION_ANKLE_LEFT, NUI_SKELETON_POSITION_FOOT_LEFT, "Left Foot Angle");
 		 point = m_pAcquisition->GetPoint(NUI_SKELETON_POSITION_COUNT + 3);
-		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_KNEE_RIGHT, NUI_SKELETON_POSITION_ANKLE_RIGHT, NUI_SKELETON_POSITION_FOOT_RIGHT, "Right Foot");
+		 AddAngle(m_RecordedFrames - 1, point, pSkel, NUI_SKELETON_POSITION_KNEE_RIGHT, NUI_SKELETON_POSITION_ANKLE_RIGHT, NUI_SKELETON_POSITION_FOOT_RIGHT, "Right Foot Angle");
 		 m_RecordedFrames++;
 	}
 

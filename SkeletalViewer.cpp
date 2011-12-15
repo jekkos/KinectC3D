@@ -150,12 +150,9 @@ void CSkeletalViewerApp::StartRecording() {
 			// set marker point labels
 			point->SetType(btk::Point::Type::Angle);
 		}
-
-		std::string markerUnit("m");
-		std::string angleUnit("degrees");
 		// set point unit to meters
-		m_pAcquisition->SetPointUnit(btk::Point::Type::Marker, markerUnit);
-		m_pAcquisition->SetPointUnit(btk::Point::Type::Angle, angleUnit);
+		m_pAcquisition->SetPointUnit(btk::Point::Type::Marker, "m");
+		m_pAcquisition->SetPointUnit(btk::Point::Type::Angle, "degrees");
 		m_pWriter->SetInput(m_pAcquisition);
 		m_pWriter->Update();
 	}
@@ -181,7 +178,6 @@ void CSkeletalViewerApp::StopRecording() {
 		m_pAcquisition->ResizeFrameNumber(m_RecordedFrames);
 		// flush pending changes to file
 		m_pWriter->Update();
-		m_pWriter->SetInput(NULL);
 	}
 }
 
