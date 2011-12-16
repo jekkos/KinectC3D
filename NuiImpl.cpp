@@ -800,7 +800,7 @@ void CSkeletalViewerApp::Nui_DoDoubleBuffer(HWND hWnd,HDC hDC)
 }
 
 void CSkeletalViewerApp::Nui_WriteToFile(NUI_SKELETON_DATA * pSkel) {
-	if (m_pWriter) {
+	if (m_bRecording && m_pWriter) {
 		m_pAcquisition->ResizeFrameNumber(m_RecordedFrames);
 		for (INT i = 0; i < NUI_SKELETON_POSITION_COUNT; i++) {
 			if ( pSkel->eSkeletonPositionTrackingState[i] != NUI_SKELETON_POSITION_NOT_TRACKED) {
@@ -881,7 +881,7 @@ void CSkeletalViewerApp::Nui_GotSkeletonAlert( )
     //Nui_DoDoubleBuffer(GetDlgItem(m_hWnd,IDC_SKELETALVIEW), m_SkeletonDC);
 	Nui_DoDoubleBuffer(GetDlgItem(m_hWnd,IDC_VIDEOVIEW), m_VideoDC);
 	// get complete bitmap and write to avi file
-	if (m_pAviFile) {
+	if (m_bRecording && m_pAviFile) {
 		HGDIOBJ result = SelectObject(m_VideoDC, m_VideoBMP); 
 		m_pAviFile->AppendNewFrame(m_VideoBMP);
 	}

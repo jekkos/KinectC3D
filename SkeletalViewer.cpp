@@ -127,7 +127,8 @@ LRESULT CALLBACK CSkeletalViewerApp::MessageRouter(
 void CSkeletalViewerApp::StartRecording() {
 	// uses printf() format specifications for time
 	CString t = CTime::GetCurrentTime().Format(_T("%Hh%Mm%S"));
-	if (!m_pWriter) {
+	if (!m_bRecording) {
+		m_bRecording = TRUE;
 		m_RecordedFrames = 1;
 		CString str = _T("C:/skeleton_3d");
 		CString fileNameStr = str + _T("_") + t + _T(".c3d");
@@ -155,11 +156,10 @@ void CSkeletalViewerApp::StartRecording() {
 		m_pAcquisition->SetPointUnit(btk::Point::Type::Angle, "degrees");
 		m_pWriter->SetInput(m_pAcquisition);
 		m_pWriter->Update();
-	}
-	if (!m_pAviFile) {
+			
 		// capture avi file
-		CString str = _T("C:/skeleton_capture");
-		CString fileNameStr = str + _T("_") + t + _T(".avi");
+		str = _T("C:/skeleton_capture");
+		fileNameStr = str + _T("_") + t + _T(".avi");
 		int sizeOfString = (fileNameStr.GetLength() + 1);
 		LPTSTR  lpsz = new TCHAR[ sizeOfString ];
 		_tcscpy_s(lpsz, sizeOfString, fileNameStr);
@@ -170,14 +170,17 @@ void CSkeletalViewerApp::StartRecording() {
 }
 
 void CSkeletalViewerApp::StopRecording() {
-	if (m_pAviFile) {
-		delete m_pAviFile;
-		m_pAviFile = NULL;
-	}
-	if (m_pWriter) {
-		m_pAcquisition->ResizeFrameNumber(m_RecordedFrames);
-		// flush pending changes to file
-		m_pWriter->Update();
+	if (m_bRecording) {
+		m_bRecording = FALSE;
+		if (m_pAviFile) {
+			delete m_pAviFile;
+			m_pAviFile = NULL;
+		}
+		if (m_pWriter) {
+			m_pAcquisition->ResizeFrameNumber(m_RecordedFrames);
+			// flush pending changes to file
+			m_pWriter->Update();
+		}
 	}
 }
 

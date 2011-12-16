@@ -103,6 +103,7 @@ private:
     int           m_LastFPStime;
     int           m_LastFramesTotal;
 	int			  m_RecordedFrames;
+	BOOL		  m_bRecording;
 	btk::AcquisitionFileWriter::Pointer m_pWriter;
 	btk::Acquisition::Pointer m_pAcquisition;
 
