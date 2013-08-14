@@ -9,27 +9,31 @@ Rendering should be redone with Direct3D or OpenGL if one wants to make this wor
 Capturing
 ---------
 
-With this app you can capture both C3D skeleton tracking data and RGB video from Kinect simultaneously using [Mokka](http://b-tk.googlecode.com/svn/web/mokka/index.html). 
+With this app you can capture both C3D skeleton tracking data and RGB video ect simultaneously and playback using [Mokka](http://b-tk.googlecode.com/svn/web/mokka/index.html). 
 The captured C3D files also contain angular values of the interconnected skeleton joints.
+
+Capture files
+-------------
+This repository currently contains a couple of test capture files performed on a treadmill from different perspectives. [C3D files](captures/c3d) and their [avi counterparts](captures/avi) can be opened with the [Mokka configuration](captures/mokka_configruation.mvc) file easily.
 
 Publications
 ------------
-A paper was published some time ago using the Kinect to replace different pressure and angular velocity measuring sensors.
-Might be a [good starting point](http://research.microsoft.com/pubs/172555/KinectGaitEMBC2012.pdf) for further developments.
+A paper was published some time ago using the Kinect to replace different pressure and angular velocity measuring sensors. This might be a [good starting point](docs/KinectGaitEMBC2012.pdf) for further developments.
 m
 
-Possible Improvements
+Further Improvements
 ---------------------
-Some new ideas and improvements to the C3D capture files are the following
+Some new ideas and improvements are the following
 
-* Double the frame rate by interpolating each joint's coordinate data
-* Adding foot 'strike' events in C3D by calibrating the 3D space to take the ground plane into account
-* Caclulation of the elbow's velocities in the capture file by measuring the angular difference over time
+* Double the frame rate by interpolating each joint's coordinate data for smooth playback at low rates
+* Adding foot 'strike' and 'lift' events in C3D capture files by calibrating the 3D space to take the ground plane into account
+* Caclulation of the elbow's velocities e by measuring the angular difference over time
 * Calculation of the acceleration of the center of mass of the patient by using the method mentioned in the paper above
 * Visualisation of these measurements in an XY scantter plot
 
 Screenshot
 ----------
 
-![Screencap of a captured C3D file](http://www.runwalk.be/uploads/Image/kinect.png)
+![Mokka Screencap of a captured C3D file and video](screencaps/Mokka.png)
+
 
