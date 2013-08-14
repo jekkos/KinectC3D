@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MokkaModelVisualConfiguration name="skeleton_3d_22h59m50" version="1.0">
+    <MarkersList>
+        <Marker label="Hip Center" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Spine" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Shoulder Center" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Head" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Left Shoulder" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Left Elbow" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Left Wrist" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Left Hand" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Right Shoulder" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Right Elbow" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Right Wrist" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Right Hand" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Left Hip" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Left Knee" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Left Ankle" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Left Foot" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Right Hip" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Right Knee" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Right Ankle" radius="8" colorR="1" colorG="1" colorB="1"/>
+        <Marker label="Right Foot" radius="8" colorR="1" colorG="1" colorB="1"/>
+    </MarkersList>
+    <SegmentsList>
+        <Segment label="Spine" colorR="1" colorG="0.192157" colorB="0.988235" description="">
+            <Point label="Spine"/>
+            <Point label="Head"/>
+            <Point label="Shoulder Center"/>
+            <Point label="Hip Center"/>
+            <Link pt1="Spine" pt2="Shoulder Center"/>
+            <Link pt1="Spine" pt2="Hip Center"/>
+            <Link pt1="Head" pt2="Shoulder Center"/>
+            <Link pt1="Shoulder Center" pt2="Hip Center"/>
+        </Segment>
+        <Segment label="Left Arm" colorR="0.333333" colorG="1" colorB="1" description="">
+            <Point label="Left Shoulder"/>
+            <Point label="Shoulder Center"/>
+            <Point label="Left Wrist"/>
+            <Point label="Left Elbow"/>
+            <Point label="Left Hand"/>
+            <Link pt1="Left Shoulder" pt2="Shoulder Center"/>
+            <Link pt1="Left Shoulder" pt2="Left Elbow"/>
+            <Link pt1="Left Wrist" pt2="Left Elbow"/>
+            <Link pt1="Left Wrist" pt2="Left Hand"/>
+        </Segment>
+        <Segment label="Right Arm" colorR="1" colorG="1" colorB="1" description="">
+            <Point label="Right Shoulder"/>
+            <Point label="Shoulder Center"/>
+            <Point label="Right Elbow"/>
+            <Point label="Right Wrist"/>
+            <Point label="Right Hand"/>
+            <Link pt1="Right Shoulder" pt2="Shoulder Center"/>
+            <Link pt1="Right Shoulder" pt2="Right Elbow"/>
+            <Link pt1="Right Elbow" pt2="Right Wrist"/>
+            <Link pt1="Right Wrist" pt2="Right Hand"/>
+        </Segment>
+        <Segment label="Left Leg" colorR="1" colorG="0" colorB="0" description="">
+            <Point label="Left Hip"/>
+            <Point label="Left Knee"/>
+            <Point label="Left Ankle"/>
+            <Point label="Left Foot"/>
+            <Point label="Hip Center"/>
+            <Link pt1="Left Hip" pt2="Left Knee"/>
+            <Link pt1="Left Hip" pt2="Hip Center"/>
+            <Link pt1="Left Knee" pt2="Left Ankle"/>
+            <Link pt1="Left Ankle" pt2="Left Foot"/>
+        </Segment>
+        <Segment label="Right Leg" colorR="1" colorG="0" colorB="0" description="">
+            <Point label="Right Hip"/>
+            <Point label="Right Knee"/>
+            <Point label="Right Ankle"/>
+            <Point label="Right Foot"/>
+            <Point label="Hip Center"/>
+            <Link pt1="Right Hip" pt2="Right Knee"/>
+            <Link pt1="Right Hip" pt2="Hip Center"/>
+            <Link pt1="Right Knee" pt2="Right Ankle"/>
+            <Link pt1="Right Ankle" pt2="Right Foot"/>
+        </Segment>
+    </SegmentsList>
+</MokkaModelVisualConfiguration>
