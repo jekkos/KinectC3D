@@ -14,7 +14,7 @@ The captured C3D files also contain angular values of the interconnected skeleto
 
 Capture files
 -------------
-This repository currently contains a couple of test capture files performed on a treadmill from different perspectives. [C3D files](captures/c3d) and their [avi counterparts](captures/avi) can be opened with the [Mokka configuration](captures/mokka_configruation.mvc) file easily.
+This repository currently contains a couple of test capture files performed on a treadmill from different perspectives. [C3D files](captures/c3d) and their [avi counterparts](captures/avi) can be opened with the [Mokka configuration](captures/mokka_configuration.mvc) file easily.
 
 Publications
 ------------
